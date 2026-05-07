@@ -1,6 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parley — Multi-Agent Roundtable</title>
+<style>
+  /* ─── Reset & Base ─── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ─── Header ─── */
+  header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 16px;
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-size: 15px; font-weight: 700;
+    background: linear-gradient(135deg, #58a6ff, #3fb950);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    white-space: nowrap;
+  }
+  .controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; flex: 1; }
+  .controls label { font-size: 10px; color: #8b949e; white-space: nowrap; }
+  .controls input, .controls select, .controls button {
+    padding: 4px 8px; border-radius: 5px; border: 1px solid #30363d;
+    background: #0d1117; color: #e6edf3; font-size: 12px;
+  }
+  .controls input { font-size: 12px; }
+  .controls input:focus { outline: none; border-color: #58a6ff; }
+  .controls button {
+    background: #238636; border-color: #2ea043; cursor: pointer;
+    font-weight: 600; padding: 4px 14px; font-size: 12px;
+  }
+  .controls button:hover { background: #2ea043; }
+  .controls button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-badge {
+    font-size: 11px; padding: 3px 10px; border-radius: 12px;
+    background: #1c2128; border: 1px solid #30363d; white-space: nowrap;
+  }
+  .status-badge.ready { border-color: #3fb950; color: #3fb950; }
+  .status-badge.running { border-color: #d29922; color: #d29922; animation: pulse 1.5s infinite; }
+  .status-badge.done { border-color: #58a6ff; color: #58a6ff; }
+  .status-badge.error { border-color: #f85149; color: #f85149; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+
+  /* ─── Main Layout ─── */
+  .main-layout {
+    display: flex; flex: 1; overflow: hidden;
+  }
+  .circle-area {
+    flex: 1; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    min-width: 0;
+  }
+  #circle-canvas {
+    width: 100%; height: 100%;
+    display: block;
+  }
+  /* ─── Side Panel (left side) ─── */
+  .side-panel {
+    width: 420px; flex-shrink: 0;
+    background: #161b22;
+    border-right: 1px solid #30363d;
+    display: flex; flex-direction: column;
+    order: -1;
+  }
+  .side-panel .panel-header {
+    padding: 10px 16px;
+    font-size: 12px; font-weight: 600; color: #8b949e;
+    border-bottom: 1px solid #30363d;
+    display: flex; justify-content: space-between;
+  }
+  .side-panel .log-area {
+    flex: 1; overflow-y: auto; padding: 8px;
+    font-size: 13px; line-height: 1.5;
+  }
+  .log-area .log-msg {
+    padding: 6px 10px; margin-bottom: 4px;
+    border-radius: 6px; border-left: 3px solid #30363d;
+    animation: fadeIn 0.3s;
+  }
+  .log-area .log-msg .label { font-weight: 600; font-size: 12px; }
+  .log-area .log-msg .time { font-size: 10px; color: #8b949e; float: right; }
+  .log-area .log-msg.thinking { border-left-color: #d29922; background: rgba(210,153,34,0.08); }
+  .log-area .log-msg.message { border-left-color: #58a6ff; }
+  .log-area .log-msg.error { border-left-color: #f85149; background: rgba(248,81,73,0.08); }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ─── Markdown in log ─── */
+  .log-area .log-msg code {
+    background: rgba(48,54,61,0.5); padding: 1px 5px; border-radius: 3px;
+    font-size: 11px; font-family: 'Consolas', 'Monaco', monospace;
+  }
+  .log-area .log-msg pre {
+    background: rgba(48,54,61,0.3); padding: 8px 10px; border-radius: 5px;
+    margin: 6px 0; overflow-x: auto; font-size: 11px;
+  }
+  .log-area .log-msg pre code { background: none; padding: 0; }
+  .log-area .log-msg ul { margin: 4px 0; padding-left: 18px; }
+  .log-area .log-msg li { font-size: 13px; line-height: 1.5; }
+  .log-area .log-msg b { color: #e6edf3; }
+
+  /* ─── Session List ─── */
+  .session-panel {
+    padding: 16px 24px; background: #161b22; border-top: 1px solid #30363d;
+    max-height: 180px; overflow-y: auto; flex-shrink: 0;
+  }
+  .session-panel h3 { font-size: 12px; color: #8b949e; margin-bottom: 8px; font-weight: 600; }
+  .session-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px;
+  }
+  .session-item:hover { background: #1c2128; }
+  .session-item .sid { color: #58a6ff; font-family: monospace; font-size: 11px; }
+  .session-item .sinfo { color: #8b949e; }
+</style>
+</head>
+<body>
+
+<!-- ═══ Header ═══ -->
+<header>
+  <h1>◉ Parley</h1>
+  <div class="controls">
+    <label>Topic</label>
+    <div style="position:relative;flex:1;min-width:160px">
+      <input id="topic-input" type="text" placeholder="e.g. Should we bootstrap or raise funding?" value="Should we open source our core product?" style="width:100%;padding:4px 8px;border-radius:5px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;font-size:12px;box-sizing:border-box"/>
+      <div id="suggestions" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:#1c2128;border:1px solid #30363d;border-radius:0 0 6px 6px;max-height:180px;overflow-y:auto">
+        <div class="suggestion" onclick="setTopic('Bootstrapping vs VC - which is better?')" style="padding:5px 10px;cursor:pointer;font-size:11px;color:#e6edf3;border-bottom:1px solid #30363d">Bootstrapping vs VC - which is better?</div>
+        <div class="suggestion" onclick="setTopic('Rust vs Go for backend services in 2026')" style="padding:5px 10px;cursor:pointer;font-size:11px;color:#e6edf3;border-bottom:1px solid #30363d">Rust vs Go for backend services in 2026</div>
+        <div class="suggestion" onclick="setTopic('Should we open source our core product?')" style="padding:5px 10px;cursor:pointer;font-size:11px;color:#e6edf3;border-bottom:1px solid #30363d">Should we open source our core product?</div>
+        <div class="suggestion" onclick="setTopic('What AI safety priorities matter most?')" style="padding:5px 10px;cursor:pointer;font-size:11px;color:#e6edf3;border-bottom:1px solid #30363d">What AI safety priorities matter most?</div>
+        <div class="suggestion" onclick="setTopic('Remote vs office: what works best?')" style="padding:5px 10px;cursor:pointer;font-size:11px;color:#e6edf3">Remote vs office: what works best?</div>
+      </div>
+    </div>
+    <label>Panel</label>
+    <select id="panel-select">
+      <option value="auto-3" selected>Auto 3 (from pool) ⚡</option>
+      <option value="auto-5">Auto 5 (from pool)</option>
+      <option value="auto-2">Auto 2 (from pool)</option>
+      <option value="3-fast">3: Fast Debate</option>
+      <option value="2-duel">2: Duel</option>
+      <option value="3-debate">3: Original</option>
+      <option value="5-diverse">5: Diverse</option>
+      <option value="7-council">7: Council</option>
+    </select>
+    <button id="model-picker-btn" style="background:#1c2128;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:4px 6px;cursor:pointer;font-size:11px" title="Pick specific models">🔧</button>
+    <label>Mode</label>
+    <select id="mode-select">
+      <option value="sequential">Sequential</option>
+      <option value="parallel-first" selected>Parallel 1st ⚡</option>
+    </select>
+    <label>Rounds</label>
+    <select id="rounds-select">
+      <option value="2">2</option>
+      <option value="3" selected>3</option>
+      <option value="5">5</option>
+      <option value="7">7</option>
+    </select>
+    <label>Tokens</label>
+    <select id="tokens-select">
+      <option value="150">Short (150)</option>
+      <option value="300" selected>Medium (300)</option>
+      <option value="500">Long (500)</option>
+    </select>
+    <button id="start-btn">Start</button>
+    <button id="stop-btn" style="display:none;background:#da3633;border-color:#f85149;cursor:pointer;font-weight:600;padding:6px 14px;border-radius:6px;border:1px solid #30363d;color:#e6edf3;font-size:13px">⏹ Stop</button>
+    <span id="status-badge" class="status-badge ready">Ready</span>
+    <button id="sessions-toggle" style="background:#1c2128;border:1px solid #30363d;color:#8b949e;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">📋 Sessions</button>
+  </div>
+</header>
+
+<!-- ═══ Main Layout ═══ -->
+<div class="main-layout">
+  <div class="circle-area">
+    <canvas id="circle-canvas"></canvas>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">
+      <span>Conversation Log</span>
+      <span id="msg-count">0 messages</span>
+    </div>
+    <div id="log-area" class="log-area">
+      <div style="color:#8b949e;font-size:12px;padding:16px;text-align:center">
+        Set a topic and press Start
+      </div>
+    </div>
+    <!-- User input -->
+    <div id="user-input-container" style="display:none;border-top:1px solid #30363d;padding:8px">
+      <div style="display:flex;gap:6px">
+        <input id="user-msg-input" type="text" placeholder="Join the conversation..." style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#e6edf3;font-size:12px">
+        <button id="user-send-btn" style="background:#1f6feb;border:none;color:#fff;border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:600">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Recent Sessions (collapsed by default) ═══ -->
+<div id="session-panel" class="session-panel" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <h3 style="font-size:12px;color:#8b949e;font-weight:600;margin:0">Recent Sessions</h3>
+    <button onclick="toggleSessions()" style="background:none;border:none;color:#8b949e;cursor:pointer;font-size:16px">✕</button>
+  </div>
+  <div id="session-list"></div>
+</div>
+
+<!-- ═══ Model Picker Modal ═══ -->
+<div id="model-picker-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:rgba(0,0,0,0.6);align-items:center;justify-content:center">
+  <div style="background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;max-width:400px;width:90%">
+    <h3 style="font-size:14px;color:#e6edf3;margin-bottom:12px">Pick Specific Models</h3>
+    <div id="model-picker-list" style="margin-bottom:12px">
+      <div style="color:#8b949e;font-size:12px">Loading...</div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button onclick="closeModelPicker()" style="background:#1c2128;border:1px solid #30363d;color:#8b949e;border-radius:5px;padding:6px 14px;cursor:pointer;font-size:12px">Cancel</button>
+      <button onclick="applyModelPicker()" style="background:#238636;border:1px solid #2ea043;color:#fff;border-radius:5px;padding:6px 14px;cursor:pointer;font-size:12px;font-weight:600">Apply</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleSessions() {
+  const panel = document.getElementById('session-panel');
+  const isVisible = panel.style.display !== 'none';
+  panel.style.display = isVisible ? 'none' : 'block';
+  if (!isVisible) loadSessions();
+}
+</script>
+
+<!-- ════════════════════════════════════════════════════════════════ -->
 <script>
 // ─── Config ───
-const DEFAULT_TOPICS = ["Should we bootstrap?", "What makes a great team?", "Remote vs office — what works best?", "AI safety priorities"];
-const AGENT_COLORS = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#dfe6e9', '#a29bfe', '#fd79a8', '#00b894', '#6c5ce7'];
+const AGENT_COLORS = [
+  '#00bcd4', '#4caf50', '#ffeb3b', '#e91e63', '#2196f3', '#ff5722', '#9e9e9e'
+];
+
+// ─── Easing (Apple-style cubic-bezier ease-in-out) ───
+function easeInOut(t) {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
+// ─── Color helpers ───
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1,3), 16);
+  const g = parseInt(hex.slice(3,5), 16);
+  const b = parseInt(hex.slice(5,7), 16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+// ─── State ───
+let agents = [];
+let speakingIdx = -1;
+let thinkingIdx = -1;
+let thinkingStartTime = 0;
+let speechText = '';
+let speechVisible = false;
+let bubbleOpacity = 0;
+let bubbleLastActive = 0;
+let bubbleFadeDuration = 800;
+let animTime = 0;
+let animId = null;
+let eventSource = null;
+let messages = [];
+let isRunning = false;
+
+// Scroll awareness (don't hijack user scroll)
+
+// Event scheduling (for parallel-first display)
+let eventBuffer = [];
+let eventTimer = null;
+const EVENT_INTERVAL_MS = 1800;  // delay between scheduled events
+
+// Bubble auto-dismiss timer
+const BUBBLE_KEEP_MS = 4000;     // how long bubble stays before fading
+
+// Thinking elapsed time display
+let thinkingElapsed = 0;
+
+// ─── DOM refs ───
+const canvas = document.getElementById('circle-canvas');
+const ctx = canvas.getContext('2d');
+const logArea = document.getElementById('log-area');
+const msgCount = document.getElementById('msg-count');
+const statusBadge = document.getElementById('status-badge');
+const startBtn = document.getElementById('start-btn');
+const stopBtn = document.getElementById('stop-btn');
+const sessionsToggle = document.getElementById('sessions-toggle');
+const topicInput = document.getElementById('topic-input');
+const panelSelect = document.getElementById('panel-select');
+const modeSelect = document.getElementById('mode-select');
+const roundsSelect = document.getElementById('rounds-select');
+const tokensSelect = document.getElementById('tokens-select');
+const sessionList = document.getElementById('session-list');
+const userInputContainer = document.getElementById('user-input-container');
+const userMsgInput = document.getElementById('user-msg-input');
+const userSendBtn = document.getElementById('user-send-btn');
+const modelPickerBtn = document.getElementById('model-picker-btn');
+const modelPickerModal = document.getElementById('model-picker-modal');
+const modelPickerList = document.getElementById('model-picker-list');
+let selectedModels = [];  // User's model choices
+
+// ─── Canvas resize ───
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  ctx.scale(dpr, dpr);
+  canvas._w = rect.width;
+  canvas._h = rect.height;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ─── Drawing ───
+function getAgentPos(index, total) {
+  const w = canvas._w || 800;
+  const h = canvas._h || 600;
+  const cx = w / 2;
+  const cy = h / 2;
+  const radius = Math.min(w, h) * 0.32;
+  const angle = (index / Math.max(total, 1)) * Math.PI * 2 - Math.PI / 2;
+  return { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle), r: 28 };
+}
+
+function drawFrame(time) {
+  const w = canvas._w || 800;
+  const h = canvas._h || 600;
+  const cx = w / 2;
+  const cy = h / 2;
+
+  ctx.clearRect(0, 0, w, h);
+
+  // Background
+  ctx.fillStyle = '#0d1117';
+  ctx.fillRect(0, 0, w, h);
+
+  // Subtle grid
+  ctx.strokeStyle = 'rgba(48,54,61,0.3)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x < w; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke();
+  }
+  for (let y = 0; y < h; y += 40) {
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  }
+
+  // Orbit circle
+  const orbitRadius = Math.min(w, h) * 0.32;
+  ctx.beginPath();
+  ctx.arc(cx, cy, orbitRadius, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(48,54,61,0.4)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([4, 6]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Compute opacity for speech bubble (auto-fade after delay) ──
+  if (speechVisible && speakingIdx >= 0 && bubbleOpacity > 0) {
+    // Keep visible for BUBBLE_KEEP_MS, then fade
+    if (bubbleLastActive > 0) {
+      const elapsed = time - bubbleLastActive;
+      if (elapsed > BUBBLE_KEEP_MS) {
+        bubbleOpacity = Math.max(0, 1 - (elapsed - BUBBLE_KEEP_MS) / bubbleFadeDuration);
+      }
+    }
+  } else if (speechVisible && speakingIdx >= 0) {
+    bubbleOpacity = 1;
+    bubbleLastActive = 0;
+  } else if (bubbleLastActive > 0) {
+    const elapsed = time - bubbleLastActive;
+    bubbleOpacity = Math.max(0, 1 - elapsed / bubbleFadeDuration);
+  } else {
+    bubbleOpacity = 0;
+  }
+
+  // ── Update thinking elapsed ──
+  if (thinkingIdx >= 0 && thinkingStartTime > 0) {
+    thinkingElapsed = Math.floor((time - thinkingStartTime) / 1000);
+  } else {
+    thinkingElapsed = 0;
+  }
+
+  // Center glow (behind speech bubble)
+  if (speakingIdx >= 0 && agents.length > 0) {
+    const color = AGENT_COLORS[speakingIdx % AGENT_COLORS.length];
+    const pulse = 0.12 + 0.08 * Math.sin(time / 300);
+    const grad = ctx.createRadialGradient(cx, cy, 5, cx, cy, 70);
+    grad.addColorStop(0, hexToRgba(color, pulse));
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(cx, cy, 70, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // ── Speaking label (top-left, never overlaps) ──
+  if (speakingIdx >= 0 && agents[speakingIdx]) {
+    const color = AGENT_COLORS[speakingIdx % AGENT_COLORS.length];
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillStyle = color;
+    ctx.font = 'bold 13px sans-serif';
+    ctx.fillText(`◉ ${agents[speakingIdx].name} speaking`, 16, 12);
+  }
+
+  // ── Draw agents (all on orbit, speaker highlighted) ──
+  agents.forEach((agent, i) => {
+    const pos = getAgentPos(i, agents.length);
+    const color = AGENT_COLORS[i % AGENT_COLORS.length];
+    const isSpeaking = (i === speakingIdx);
+    const isThinking = (i === thinkingIdx);
+    const circleR = isSpeaking ? 32 : 28;
+
+    // Thinking glow
+    if (isThinking) {
+      const glow = 0.3 + 0.2 * Math.sin(time / 400 + i);
+      const grad = ctx.createRadialGradient(pos.x, pos.y, 10, pos.x, pos.y, circleR + 18);
+      grad.addColorStop(0, hexToRgba(color, glow));
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(pos.x, pos.y, circleR + 18, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Speaking glow — bigger, more atmospheric
+    if (isSpeaking) {
+      const glow = 0.35 + 0.15 * Math.sin(time / 300 + i);
+      const grad = ctx.createRadialGradient(pos.x, pos.y, 5, pos.x, pos.y, circleR + 55);
+      grad.addColorStop(0, hexToRgba(color, glow));
+      grad.addColorStop(0.5, hexToRgba(color, glow * 0.4));
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(pos.x, pos.y, circleR + 55, 0, Math.PI * 2); ctx.fill();
+    }
+
+    // Agent circle
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, circleR, 0, Math.PI * 2);
+    ctx.fillStyle = hexToRgba(color, 0.2);
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = isSpeaking ? 3 : 2;
+    ctx.stroke();
+
+    // Initial letter
+    ctx.fillStyle = color;
+    ctx.font = `bold ${isSpeaking ? 18 : 16}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(agent.name.charAt(0).toUpperCase(), pos.x, pos.y);
+
+    // Name + model below
+    ctx.fillStyle = isSpeaking ? color : '#e6edf3';
+    ctx.font = isSpeaking ? 'bold 12px sans-serif' : '12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.fillText(agent.name, pos.x, pos.y + circleR + 6);
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '9px sans-serif';
+    ctx.fillText(agent.model_short || '', pos.x, pos.y + circleR + 22);
+
+    // Elapsed thinking time
+    if (isThinking) {
+      const dots = Math.floor(time / 500) % 4;
+      ctx.fillStyle = color;
+      ctx.font = '12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(thinkingElapsed + 's' + '.'.repeat(dots), pos.x, pos.y - circleR - 18);
+    }
+  });
+
+  // ── Center: ghost agent circle + speech bubble ──
+  if (bubbleOpacity > 0.01 && speechText && speakingIdx >= 0) {
+    const spAgent = agents[speakingIdx];
+    if (!spAgent) return;
+    const color = AGENT_COLORS[speakingIdx % AGENT_COLORS.length];
+
+    ctx.globalAlpha = bubbleOpacity;
+
+    // Fixed bubble dimensions
+    const BUBBLE_W = 280;
+    const BUBBLE_H = 100;
+    const bx = cx - BUBBLE_W / 2;
+    const by = cy - BUBBLE_H / 2;
+
+    // Bubble background
+    ctx.fillStyle = 'rgba(22,27,34,0.92)';
+    ctx.strokeStyle = color + '55';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, bx, by, BUBBLE_W, BUBBLE_H, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    // Agent name header
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'top';
+    ctx.fillText(spAgent.name, bx + 10, by + 8);
+
+    // Summarized text: first ~150 chars, word-boundary
+    let summary = speechText.slice(0, 150);
+    if (speechText.length > 150) {
+      const lastSpace = summary.lastIndexOf(' ');
+      if (lastSpace > 60) summary = summary.slice(0, lastSpace);
+      summary += '...';
+    }
+
+    // Word-wrap into bubble
+    ctx.fillStyle = '#e6edf3';
+    ctx.font = '12px sans-serif';
+    const maxLineW = BUBBLE_W - 20;
+    const lineH = 17;
+    const maxLines = Math.floor((BUBBLE_H - 28) / lineH);
+    let lines = [];
+    let words = summary.split(' ');
+    let currentLine = '';
+    words.forEach(word => {
+      const test = currentLine ? currentLine + ' ' + word : word;
+      if (ctx.measureText(test).width > maxLineW && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+      } else {
+        currentLine = test;
+      }
+    });
+    if (currentLine) lines.push(currentLine);
+
+    if (lines.length > maxLines) {
+      lines = lines.slice(0, maxLines);
+      while (lines[lines.length-1].length > 15 && ctx.measureText(lines[lines.length-1] + '...').width > maxLineW) {
+        lines[lines.length-1] = lines[lines.length-1].slice(0, -1);
+      }
+      lines[lines.length-1] += '...';
+    }
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, bx + 10, by + 26 + i * lineH);
+    });
+
+    ctx.globalAlpha = 1;
+  }
+
+  // ── Empty state placeholder ──
+  if (agents.length === 0) {
+    ctx.fillStyle = '#8b949e';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('Set a topic and press Start', cx, cy);
+  }
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// ─── Animation Loop ───
+function animate(timestamp) {
+  animTime = timestamp || 0;
+  drawFrame(animTime);
+  animId = requestAnimationFrame(animate);
+}
+animate();
+
+// ─── Log helpers (scroll-aware) ───
+function isScrolledToBottom() {
+  return logArea.scrollHeight - logArea.scrollTop - logArea.clientHeight < 80;
+}
+
+function scrollToBottom() {
+  logArea.scrollTop = logArea.scrollHeight;
+  hideNewMsgIndicator();
+}
+
+function showNewMsgIndicator() {
+  let indicator = document.getElementById('new-msg-indicator');
+  if (!indicator) {
+    indicator = document.createElement('div');
+    indicator.id = 'new-msg-indicator';
+    indicator.style.cssText = 'position:sticky;bottom:4px;margin:4px 8px;text-align:center;padding:5px;font-size:11px;color:#58a6ff;background:rgba(22,27,34,0.95);cursor:pointer;border:1px solid #30363d;border-radius:6px';
+    indicator.textContent = '↓ New messages — click to see';
+    indicator.onclick = (e) => { e.stopPropagation(); scrollToBottom(); };
+    logArea.appendChild(indicator);
+  }
+}
+
+function hideNewMsgIndicator() {
+  const el = document.getElementById('new-msg-indicator');
+  if (el) el.remove();
+}
+
+function addLog(type, html) {
+  const wasAtBottom = isScrolledToBottom();
+  const div = document.createElement('div');
+  div.className = `log-msg ${type}`;
+  div.innerHTML = html;
+  logArea.appendChild(div);
+  if (wasAtBottom) {
+    // Need a microtask so scrollHeight is updated
+    requestAnimationFrame(() => scrollToBottom());
+  } else {
+    showNewMsgIndicator();
+  }
+}
+
+function clearLog() {
+  logArea.innerHTML = '';
+}
+
+// ─── Expandable Log Messages ───
+function addExpandableLog(type, innerHtml, expandText) {
+  const wasAtBottom = isScrolledToBottom();
+  const div = document.createElement('div');
+  div.className = `log-msg ${type}`;
+
+  if (expandText && expandText.length > 250) {
+    const preview = expandText.slice(0, 250);
+    const full = expandText;
+    div.innerHTML = innerHtml + '<div class="msg-preview">' + renderMarkdown(preview) + '</div>' +
+      '<div class="msg-full" style="display:none">' + renderMarkdown(full) + '</div>' +
+      '<button class="expand-btn" onclick="toggleMessage(this)" style="background:none;border:none;color:#58a6ff;cursor:pointer;font-size:11px;padding:2px 0">Show more ▼</button>';
+  } else if (expandText) {
+    div.innerHTML = innerHtml + '<div class="msg-preview">' + renderMarkdown(expandText) + '</div>';
+  } else {
+    div.innerHTML = innerHtml;
+  }
+
+  logArea.appendChild(div);
+  if (isScrolledToBottom()) {
+    requestAnimationFrame(() => scrollToBottom());
+  } else {
+    showNewMsgIndicator();
+  }
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ─── Markdown rendering (lightweight) ───
+function renderMarkdown(text) {
+  let html = escapeHtml(text);
+  // fenced code blocks: ``` ... ```
+  html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // inline code: `text`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // bold: **text**
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  // italic: *text* (but not **)
+  html = html.replace(/\*([^*]+)\*/g, '<i>$1</i>');
+  // unordered list: - item
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  // ordered list: 1. item
+  html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/(<li>.*?<\/li>\n?)+/g, '<ul>$&</ul>');
+  // headers: ## text
+  html = html.replace(/^## (.+)$/gm, '<b>$1</b>');
+  // newlines to <br> (but not inside <pre>/<code>)
+  html = html.replace(/\n/g, '<br>');
+  // clean up double <br>
+  html = html.replace(/(<br>){3,}/g, '<br><br>');
+  return html;
+}
+
+function toggleMessage(btn) {
+  const full = btn.parentElement.querySelector('.msg-full');
+  const preview = btn.parentElement.querySelector('.msg-preview');
+  if (full && full.style.display === 'none') {
+    full.style.display = 'block';
+    preview.style.display = 'none';
+    btn.textContent = 'Show less ▲';
+  } else if (full) {
+    full.style.display = 'none';
+    preview.style.display = 'block';
+    btn.textContent = 'Show more ▼';
+  }
+}
+
+// ─── Event Scheduler (buffer events for sequential display) ───
+function scheduleEvent(event) {
+  if (event.type === 'message') {
+    // Buffer messages for sequential display
+    eventBuffer.push(event);
+    if (!eventTimer) processEventQueue();
+    return true;  // event is buffered
+  }
+  return false;  // event was not buffered
+}
+
+function processEventQueue() {
+  if (eventBuffer.length === 0) {
+    eventTimer = null;
+    return;
+  }
+  eventTimer = setTimeout(() => {
+    const event = eventBuffer.shift();
+    displayEvent(event);
+    processEventQueue();
+  }, EVENT_INTERVAL_MS);
+}
+
+function displayEvent(event) {
+  thinkingIdx = -1;
+  thinkingStartTime = 0;
+  speakingIdx = event.agent_index;
+  speechVisible = true;
+  speechText = event.content;
+  bubbleOpacity = 1;
+  bubbleLastActive = performance.now();  // start auto-fade timer
+  messages.push(event);
+  addExpandableLog('message',
+    `<span class="label" style="color:${AGENT_COLORS[event.agent_index % AGENT_COLORS.length]}">${event.agent_name}</span>` +
+    ` <span class="time">${event.latency_s}s · ${event.model_short}</span><br/>`,
+    event.content
+  );
+  updateMsgCount();
+}
+
+// ─── Session Summary ───
+function generateSummary(sessionId) {
+  const btn = document.getElementById('summary-btn');
+  if (btn) { btn.textContent = '⏳ Generating...'; btn.disabled = true; }
+
+  addLog('thinking', `<span class="label">Generating session summary...</span>`);
+
+  fetch(`/api/summarize/${sessionId}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        addLog('error', `<span class="label">Summary failed: ${data.error}</span>`);
+        if (btn) { btn.textContent = '📝 Retry'; btn.disabled = false; }
+        return;
+      }
+      // Remove summary button
+      if (btn && btn.parentElement) btn.parentElement.remove();
+      // Show summary
+      addLog('message', `<span class="label" style="color:#3fb950">📋 Session Summary</span><br/>${renderMarkdown(data.summary)}`);
+      requestAnimationFrame(() => scrollToBottom());
+    })
+    .catch(err => {
+      addLog('error', `<span class="label">Summary request failed: ${err.message}</span>`);
+      if (btn) { btn.textContent = '📝 Retry'; btn.disabled = false; }
+    });
+}
+
+// ─── SSE Handling ───
+function stopConversation() {
+  if (eventSource) {
+    eventSource.close();
+    eventSource = null;
+  }
+  isRunning = false;
+  startBtn.disabled = false;
+  stopBtn.style.display = 'none';
+  userInputContainer.style.display = 'none';
+  // Start fade-out for last message
+  if (speakingIdx >= 0) {
+    bubbleLastActive = performance.now();
+  }
+  speakingIdx = -1;
+  thinkingIdx = -1;
+  statusBadge.className = 'status-badge done';
+  statusBadge.textContent = 'Stopped';
+  addLog('thinking', `<span class="label">⏹ Conversation stopped</span>`);
+}
+
+function startConversation(topic, panel, rounds, mode, maxTokens, preferredModels) {
+  // If running, stop first and show summary
+  if (isRunning) {
+    if (messages.length > 0) {
+      // Generate simple summary
+      const agentNames = [...new Set(messages.map(m => m.agent_name))].join(', ');
+      const lastMsg = messages[messages.length - 1];
+      addLog('thinking', `<span class="label">─── Summary of stopped session ───</span>`);
+      addLog('message', `<span class="label">Agents:</span> ${agentNames} &nbsp;|&nbsp; <span class="label">Messages:</span> ${messages.length} &nbsp;|&nbsp; <span class="label">Last:</span> ${lastMsg.agent_name} — ${lastMsg.content.slice(0,100)}...`);
+      addLog('thinking', `<span class="label">─── Starting new session ───</span>`);
+    }
+    stopConversation();
+  }
+
+  isRunning = true;
+  clearLog();
+  agents = [];
+  speakingIdx = -1;
+  thinkingIdx = -1;
+  thinkingStartTime = 0;
+  speechText = '';
+  speechVisible = false;
+  messages = [];
+  bubbleOpacity = 0;
+  bubbleLastActive = 0;
+  updateMsgCount();
+  statusBadge.className = 'status-badge running';
+  statusBadge.textContent = 'Running...';
+  startBtn.disabled = true;
+  stopBtn.style.display = 'inline-block';
+  userInputContainer.style.display = 'block';
+  userMsgInput.value = '';
+
+  addLog('thinking', `<span class="label">Starting conversation (${mode})...</span>`);
+
+  fetch('/api/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ topic, panel, rounds, mode, max_tokens: maxTokens, models: preferredModels && preferredModels.length > 0 ? preferredModels : undefined }),
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      statusBadge.className = 'status-badge error';
+      statusBadge.textContent = 'Error';
+      addLog('error', `<span class="label">${data.error}</span>`);
+      isRunning = false;
+      startBtn.disabled = false;
+      return;
+    }
+
+    const es = new EventSource(data.stream_url);
+    eventSource = es;
+
+    es.onmessage = (e) => {
+      const event = JSON.parse(e.data);
+
+      switch (event.type) {
+        case 'session_start':
+          agents = event.agents;
+          break;
+
+        case 'thinking':
+          // Start bubble fade for previous speaker
+          if (speakingIdx >= 0) {
+            bubbleLastActive = performance.now();
+          }
+          thinkingIdx = event.agent_index;
+          thinkingStartTime = performance.now();
+          thinkingElapsed = 0;
+          addLog('thinking', `<span class="label" style="color:${AGENT_COLORS[event.agent_index % AGENT_COLORS.length]}">${event.agent_name}</span> is thinking... <span class="time">${(event.model_short || event.model.split('/').pop()).replace(':free','')}</span>`);
+          break;
+
+        case 'message':
+          // Use scheduler to buffer and display sequentially
+          scheduleEvent(event);
+          break;
+
+        case 'round_start':
+          addLog('thinking', `<span class="label">─── Round ${event.round}/${event.total} ───</span>`);
+          break;
+
+        case 'error':
+          statusBadge.className = 'status-badge error';
+          statusBadge.textContent = 'Error';
+          const errMsg1 = event.message || '';
+          if (errMsg1.includes('429') || errMsg1.includes('Too Many') || errMsg1.includes('rate limit')) {
+            addLog('error', `<span class="label">⚠️ Rate limited by OpenRouter. The free tier allows ~10 requests per minute. Waiting and retrying...</span>`);
+          } else {
+            addLog('error', `<span class="label">Error: ${event.message}</span>`);
+          }
+          break;
+
+        case 'end':
+          speakingIdx = -1;
+          thinkingIdx = -1;
+          statusBadge.className = 'status-badge done';
+          statusBadge.textContent = `Done (${event.message_count} messages)`;
+          addLog('thinking', `<span class="label">✓ Complete — ${event.message_count} messages</span>`);
+          isRunning = false;
+          startBtn.disabled = false;
+          stopBtn.style.display = 'none';
+          userInputContainer.style.display = 'none';
+          // Clear event buffer
+          eventBuffer = [];
+          if (eventTimer) { clearTimeout(eventTimer); eventTimer = null; }
+          startBtn.disabled = false;
+          stopBtn.style.display = 'none';
+          isRunning = false;
+          startBtn.disabled = false;
+          stopBtn.style.display = 'none';
+          userInputContainer.style.display = 'none';
+          // Clear event buffer
+          eventBuffer = [];
+          if (eventTimer) { clearTimeout(eventTimer); eventTimer = null; }
+          es.close();
+          eventSource = null;
+          loadSessions();
+          break;
+
+        case 'thinking':
+          // Start bubble fade-out for previous speaker
+          if (speakingIdx >= 0) {
+            bubbleLastActive = performance.now();
+          }
+          thinkingIdx = event.agent_index;
+          thinkingStartTime = performance.now();
+          thinkingElapsed = 0;
+          addLog('thinking', `<span class="label" style="color:${AGENT_COLORS[event.agent_index % AGENT_COLORS.length]}">${event.agent_name}</span> is thinking... <span class="time">${event.model.split('/').pop()}</span>`);
+          break;
+
+        case 'message':
+          thinkingIdx = -1;
+          thinkingStartTime = 0;
+          speakingIdx = event.agent_index;
+          speechVisible = true;
+          speechText = event.content;
+          bubbleOpacity = 1;
+          bubbleLastActive = 0;
+          messages.push(event);
+
+          addExpandableLog('message',
+            `<span class="label" style="color:${AGENT_COLORS[event.agent_index % AGENT_COLORS.length]}">${event.agent_name}</span>` +
+            ` <span class="time">${event.latency_s}s · ${event.model_short}</span><br/>`,
+            event.content
+          );
+          updateMsgCount();
+          break;
+
+        case 'round_start':
+          addLog('thinking', `<span class="label">─── Round ${event.round}/${event.total} ───</span>`);
+          break;
+
+        case 'error':
+          statusBadge.className = 'status-badge error';
+          statusBadge.textContent = 'Error';
+          addLog('error', `<span class="label">Error: ${event.message}</span>`);
+          break;
+
+        case 'end':
+          // Start fade-out for the last speaker
+          if (speakingIdx >= 0) {
+            bubbleLastActive = performance.now();
+          }
+          speakingIdx = -1;
+          thinkingIdx = -1;
+          statusBadge.className = 'status-badge done';
+          statusBadge.textContent = `Done (${event.message_count} messages)`;
+          addLog('thinking', `<span class="label">✓ Complete — ${event.message_count} messages</span>`);
+          isRunning = false;
+          startBtn.disabled = false;
+          stopBtn.style.display = 'none';
+          userInputContainer.style.display = 'none';
+          es.close();
+          eventSource = null;
+          loadSessions();
+          break;
+      }
+    };
+
+    es.onerror = () => {
+      // Reconnection handled by EventSource automatically
+    };
+  })
+  .catch(err => {
+    statusBadge.className = 'status-badge error';
+    statusBadge.textContent = 'Error';
+    addLog('error', `<span class="label">Connection failed: ${err.message}</span>`);
+    isRunning = false;
+    startBtn.disabled = false;
+  });
+}
+
+function updateMsgCount() {
+  msgCount.textContent = `${messages.length} messages`;
+}
+
+// ─── Session List ───
+function loadSessions() {
+  fetch('/api/sessions')
+    .then(r => r.json())
+    .then(sessions => {
+      sessionList.innerHTML = '';
+      if (sessions.length === 0) {
+        sessionList.innerHTML = '<div class="session-item" style="color:#8b949e">No sessions yet</div>';
+        return;
+      }
+      sessions.slice(0, 10).forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'session-item';
+        div.innerHTML = `
+          <span class="sid">${s.session_id.slice(0, 25)}...</span>
+          <span class="sinfo">${s.topic.slice(0, 30)} — ${s.messages} msgs</span>
+        `;
+        div.onclick = () => {
+          window.open(`/api/session/${s.session_id}`, '_blank');
+        };
+        sessionList.appendChild(div);
+      });
+    })
+    .catch(() => {});
+}
+
+// ─── Start button ───
+startBtn.addEventListener('click', () => {
+  const topic = topicInput.value.trim();
+  if (!topic) {
+    topicInput.focus();
+    return;
+  }
+  startConversation(topic, panelSelect.value, parseInt(roundsSelect.value),
+    modeSelect.value, parseInt(tokensSelect.value), selectedModels);
+});
+
+// ─── Stop button ───
+stopBtn.addEventListener('click', stopConversation);
+
+// ─── Model Picker ───
+function openModelPicker() {
+  fetch('/api/pool')
+    .then(r => r.json())
+    .then(data => {
+      modelPickerList.innerHTML = '';
+      const models = data.models || [];
+      models.forEach(m => {
+        const checked = selectedModels.length === 0 || selectedModels.includes(m.id) ? 'checked' : '';
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px 8px;cursor:pointer;border-radius:4px';
+        div.onmouseenter = () => div.style.background = '#1c2128';
+        div.onmouseleave = () => div.style.background = 'transparent';
+        div.innerHTML = `<input type="checkbox" id="pick-${m.id}" value="${m.id}" ${checked} style="accent-color:#58a6ff">
+          <label for="pick-${m.id}" style="font-size:12px;cursor:pointer;flex:1;color:#e6edf3">${m.name}</label>
+          <span style="font-size:10px;color:#8b949e">${m.speed}</span>`;
+        modelPickerList.appendChild(div);
+      });
+      modelPickerModal.style.display = 'flex';
+    });
+}
+
+function closeModelPicker() {
+  modelPickerModal.style.display = 'none';
+}
+
+function applyModelPicker() {
+  const checked = modelPickerList.querySelectorAll('input[type=checkbox]:checked');
+  selectedModels = Array.from(checked).map(cb => cb.value);
+  closeModelPicker();
+  if (selectedModels.length > 0) {
+    // Switch to auto panel of matching size
+    const size = selectedModels.length;
+    panelSelect.value = `auto-${size}`;
+  }
+}
+
+modelPickerBtn.addEventListener('click', openModelPicker);
+
+// Close modal on overlay click
+modelPickerModal.addEventListener('click', (e) => {
+  if (e.target === modelPickerModal) closeModelPicker();
+});
+
+// ─── Scroll tracking ───
+logArea.addEventListener('scroll', () => {
+  if (isScrolledToBottom()) {
+    hideNewMsgIndicator();
+  }
+});
+
+// ─── Panel preview (show agents when settings change) ───
+panelSelect.addEventListener('change', () => {
+  if (!isRunning) loadPanelPreview();
+});
+
+function loadPanelPreview() {
+  const panelName = panelSelect.value;
+  fetch(`/api/panels/${panelName}`)
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.agents) {
+        agents = data.agents.map(a => ({ ...a, model_short: a.model_short || a.model.split('/').pop().replace(':free','') }));
+      }
+    })
+    .catch(() => {});
+}
+
+// ─── User send ───
+userSendBtn.addEventListener('click', () => {
+  const text = userMsgInput.value.trim();
+  if (!text || !isRunning || !eventSource) return;
+  // Inject as a log entry (visual only - server doesn't process it)
+  addLog('message',
+    `<span class="label" style="color:#fff">You</span>` +
+    ` <span class="time">now</span><br/>` + renderMarkdown(text)
+  );
+  userMsgInput.value = '';
+});
+userMsgInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') userSendBtn.click();
+});
+
+// Enter key to start
+topicInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') startBtn.click();
+});
+
+// ─── Topic suggestions (search-bar dropdown) ───
+const suggestionsEl = document.getElementById('suggestions');
+
+function setTopic(text) {
+  topicInput.value = text;
+  suggestionsEl.style.display = 'none';
+  topicInput.focus();
+}
+
+topicInput.addEventListener('focus', () => {
+  suggestionsEl.style.display = 'block';
+});
+topicInput.addEventListener('blur', () => {
+  setTimeout(() => { suggestionsEl.style.display = 'none'; }, 200);
+});
+topicInput.addEventListener('input', () => {
+  const val = topicInput.value.toLowerCase();
+  const items = suggestionsEl.querySelectorAll('.suggestion');
+  let anyVisible = false;
+  items.forEach(item => {
+    const match = item.textContent.toLowerCase().includes(val);
+    item.style.display = match ? 'block' : 'none';
+    if (match) anyVisible = true;
+  });
+  suggestionsEl.style.display = anyVisible ? 'block' : 'none';
+});
+
+// ─── Init ───
+loadSessions();
 </script>
-</body></html>
+</body>
+</html>
