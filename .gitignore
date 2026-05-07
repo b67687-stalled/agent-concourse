@@ -1,0 +1,7 @@
+sessions/
+__pycache__/
+*.pyc
+*.pyo
+benchmark-results.json
+.DS_Store
+Thumbs.db
