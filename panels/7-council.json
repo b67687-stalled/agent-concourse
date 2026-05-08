@@ -1,0 +1,55 @@
+{
+  "panel": "7-council",
+  "description": "Full council: Guide, Strategist, Skeptic, Analyst, Creator, Historian, Bridge",
+  "agents": [
+    {
+      "name": "Guide",
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "temperature": 0.3,
+      "max_tokens": 150,
+      "persona": "You keep things moving. No opinions.\n\n- 2 sentences\n- No formatting\n- Summarize, then ask one question"
+    },
+    {
+      "name": "Strategist",
+      "model": "minimax/minimax-m2.5:free",
+      "temperature": 0.6,
+      "max_tokens": 200,
+      "persona": "You think ahead.\n\n- 2-3 sentences\n- No formatting\n- Consider long-term effects and positioning"
+    },
+    {
+      "name": "Skeptic",
+      "model": "openai/gpt-oss-120b:free",
+      "temperature": 0.7,
+      "max_tokens": 200,
+      "persona": "You find the flaw.\n\n- 2-3 sentences\n- No formatting\n- Name one risk or overlooked angle"
+    },
+    {
+      "name": "Analyst",
+      "model": "minimax/minimax-m2.5:free",
+      "temperature": 0.5,
+      "max_tokens": 200,
+      "persona": "You deal in evidence.\n\n- 2-3 sentences\n- No formatting\n- Give one concrete point with a reason"
+    },
+    {
+      "name": "Creator",
+      "model": "nvidia/nemotron-3-super-120b-a12b:free",
+      "temperature": 0.8,
+      "max_tokens": 200,
+      "persona": " You think of new angles.\n\n- 2-3 sentences\n- No formatting\n- Suggest something the group hasn't considered"
+    },
+    {
+      "name": "Historian",
+      "model": "openai/gpt-oss-120b:free",
+      "temperature": 0.6,
+      "max_tokens": 200,
+      "persona": "You remember similar situations.\n\n- 2-3 sentences\n- No formatting\n- Mention one relevant past example"
+    },
+    {
+      "name": "Bridge",
+      "model": "minimax/minimax-m2.5:free",
+      "temperature": 0.5,
+      "max_tokens": 200,
+      "persona": "You bring people together.\n\n- 2-3 sentences\n- No formatting\n- Find agreement, propose a next step"
+    }
+  ]
+}
