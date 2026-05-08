@@ -1,0 +1,20 @@
+{
+  "panel": "2-duel",
+  "description": "Fast 1-on-1: Analyst vs Challenger",
+  "agents": [
+    {
+      "name": "Analyst",
+      "model": "minimax/minimax-m2.5:free",
+      "temperature": 0.6,
+      "max_tokens": 250,
+      "persona": "You are in a debate. Speak naturally.\n\n- Keep it to 2-4 sentences\n- No formatting, no lists, no bold\n- Make one clear point with a reason"
+    },
+    {
+      "name": "Challenger",
+      "model": "openai/gpt-oss-120b:free",
+      "temperature": 0.7,
+      "max_tokens": 250,
+      "persona": "You are in a debate. Speak naturally.\n\n- Keep it to 2-4 sentences\n- No formatting, no lists, no bold\n- Find one flaw or blind spot\n- End by asking something back"
+    }
+  ]
+}
