@@ -1,4 +1,4 @@
-# Parley — Multi-Agent Conversation System
+# Parley --- Multi-Agent Conversation System
 
 A web-based platform where multiple free AI agents talk to each other in real-time,
 visible as a circle visualization with speech bubbles. Agents can debate, brainstorm,
@@ -9,7 +9,7 @@ or have free-form conversations that are recorded for analysis.
 ## Quick Start
 
 ```bash
-python3 /home/namikaz/projects/dev/agentic-workflows/agent-concourse/web/server.py
+python3 ./agent-concourse/web/server.py
 # Open http://localhost:8080
 ```
 
@@ -47,7 +47,7 @@ Requires an OpenRouter API key (auto-detected from your OpenCode auth store).
 
 ### Core Loop
 
-1. User picks topic + panel size + optional specific models → clicks Start
+1. User picks topic + panel size + optional specific models -> clicks Start
 2. Server creates session, queues SSE events, launches conversation in background thread
 3. **Round 1 (parallel-first mode):** All agents called simultaneously (with 2s stagger for rate limits)
 4. **Frontend buffers messages** and displays them one at a time (1.8s interval)
@@ -116,7 +116,7 @@ to prevent visual overload when agents respond in parallel.
 
 ### Auto Panels (dynamic)
 
-`auto-2`, `auto-3`, `auto-5` — Generates agents by cycling through the model pool
+`auto-2`, `auto-3`, `auto-5` --- Generates agents by cycling through the model pool
 and assigning generic archetypes (Analyst, Challenger, Closer, Guide, etc.).
 
 The 🔧 button opens a model picker where you can select specific models. Your
@@ -128,7 +128,7 @@ All 24 free OpenRouter models are in the pool. The rate limiter and backup fallb
 handle failures gracefully:
 - 3s minimum between requests
 - 8 req/min cap
-- 5s → 10s → 20s backoff on 429 errors
+- 5s -> 10s -> 20s backoff on 429 errors
 - Falls through backup models on saturation
 
 ---
@@ -149,13 +149,13 @@ handle failures gracefully:
 - Left sidebar, 420px wide
 - Markdown rendered (bold, italic, code, lists, headers)
 - Messages >250 chars are expandable ("Show more" shows full content)
-- Scroll-aware: if you're at the bottom, auto-scrolls; if scrolled up, "↓ New messages" indicator
+- Scroll-aware: if you're at the bottom, auto-scrolls; if scrolled up, "v New messages" indicator
 - User can inject their own messages via the input at the bottom
 - "Generate Summary" button appears after session ends
 
 ### Session List
 
-- Hidden by default — toggled via 📋 Sessions button in header
+- Hidden by default --- toggled via 📋 Sessions button in header
 - Shows recent 10 sessions with topic and message count
 - Click to open session JSON in new tab
 
@@ -169,7 +169,7 @@ handle failures gracefully:
 
 2. **Rate limiting is critical:** Free tier allows ~10 requests/min. Parallel
    execution needs 2s+ stagger between thread launches. Sequential needs 2s
-   between agent turns. Exponential backoff (5s → 10s → 20s) on 429 errors.
+   between agent turns. Exponential backoff (5s -> 10s -> 20s) on 429 errors.
 
 3. **Parallel-first is best:** Launching all agents simultaneously (Round 1)
    then switching to sequential (Rounds 2+) is ~3x faster than pure sequential.

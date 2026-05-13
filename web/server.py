@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parley Web Server — Circle UI backend
+Parley Web Server --- Circle UI backend
 =======================================
 Starts conversations, streams agent responses via SSE, serves the frontend.
 
@@ -674,7 +674,7 @@ class ParleyHandler(http.server.BaseHTTPRequestHandler):
                     self._send_json({"error": "Invalid auto panel size"}, 400)
                     return
             else:
-                # Named panel — validate and load
+                # Named panel --- validate and load
                 panel_file = PANELS_DIR / f"{panel_name}.json"
                 if not panel_file.exists():
                     self._send_json({"error": f"Panel not found: {panel_name}"}, 400)

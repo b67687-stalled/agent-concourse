@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Parley Speed Benchmark — tests every free model for latency
+Parley Speed Benchmark --- tests every free model for latency
 ============================================================
 Usage: python3 agent-concourse/web/benchmark.py [--rounds 3]
 """

@@ -193,7 +193,7 @@ replay_session() {
 
   echo ""
   divider "═" 70
-  echo -e "  ${C_SUCCESS}End of replay — $msg_count messages${C_RST}"
+  echo -e "  ${C_SUCCESS}End of replay --- $msg_count messages${C_RST}"
   divider "═" 70
   echo ""
   exit 0
@@ -211,11 +211,11 @@ show_header() {
 
   clear
   divider "═" 70
-  printf "  ${C_HEADER}%-68s${C_RST}\n" "PARLEY — Multi-Agent Conversation"
+  printf "  ${C_HEADER}%-68s${C_RST}\n" "PARLEY --- Multi-Agent Conversation"
   divider "═" 70
   echo ""
   echo -e "  ${C_BOLD}Topic:${C_RST}  $topic"
-  echo -e "  ${C_BOLD}Panel:${C_RST}  $panel_name — $panel_desc"
+  echo -e "  ${C_BOLD}Panel:${C_RST}  $panel_name --- $panel_desc"
   echo -e "  ${C_BOLD}Rounds:${C_RST} $rounds  |  Agents: $agent_count"
   echo ""
   divider "─" 70
@@ -507,7 +507,7 @@ PANEL_DESC="$(jq -r '.description // "Conversation panel"' "$PANEL_FILE")"
 # === Dry run: show lineup and exit ===
 if [[ "$DRY_RUN" == true ]]; then
   echo ""
-  echo -e "  ${C_HEADER}Dry Run — Panel: $PANEL_NAME${C_RST}"
+  echo -e "  ${C_HEADER}Dry Run --- Panel: $PANEL_NAME${C_RST}"
   echo ""
   printf "  %-18s %-12s %s\n" "AGENT" "ROLE" "MODEL"
   echo "  $(printf '%0.s─' {1..65})"
@@ -593,7 +593,7 @@ for round in $(seq 1 "$ROUNDS"); do
     prev_messages="$(build_history_messages "$SESSION_FILE")"
     result="$(call_agent "$AGENTS_JSON" "$agent_i" "$round" "$ROUNDS" "$TOPIC" "$prev_messages")" || {
       clear_thinking
-      echo -e "  ${C_ERROR}✗ $name — API call failed${C_RST}"
+      echo -e "  ${C_ERROR}✗ $name --- API call failed${C_RST}"
       if [[ "$AUTO_MODE" == false ]]; then
         prompt_continue "false" || AUTO_MODE=true
       fi
@@ -667,7 +667,7 @@ message_count="$(jq '.messages | length' "$SESSION_FILE")"
 # === End Screen ===
 echo ""
 divider "═" 70
-echo -e "  ${C_SUCCESS}Conversation complete — $message_count messages${C_RST}"
+echo -e "  ${C_SUCCESS}Conversation complete --- $message_count messages${C_RST}"
 divider "═" 70
 echo ""
 echo -e "  ${C_BOLD}Session:${C_RST}  $SESSION_ID"
