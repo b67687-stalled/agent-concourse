@@ -5,7 +5,7 @@ discuss topics in real-time. Features a circle visualization web UI and a
 terminal-based CLI.
 
 <p align="center">
-  <img src="assets/demo-parley.svg?v=2" alt="Parley demo — 5-agent debate on open-sourcing" width="90%">
+  <img src="assets/demo-parley-v2.svg" alt="Parley demo — 5-agent debate on open-sourcing" width="90%">
 </p>
 
 ## Quick Start
