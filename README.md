@@ -4,6 +4,10 @@ A multi-agent conversation platform where AI agents debate, brainstorm, and
 discuss topics in real-time. Features a circle visualization web UI and a
 terminal-based CLI.
 
+<p align="center">
+  <img src="assets/demo-parley.svg" alt="Parley demo — 5-agent debate on open-sourcing" width="90%">
+</p>
+
 ## Quick Start
 
 ```bash

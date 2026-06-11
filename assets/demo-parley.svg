@@ -1,0 +1,143 @@
+<?xml version='1.0' encoding='utf-8'?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" width="900" height="580">
+  <!-- Window frame -->
+  <rect x="4" y="4" width="900" height="580" rx="10" fill="#00000040" />
+  <rect x="0" y="0" width="900" height="580" rx="10" fill="#0d1117" />
+  <rect x="0" y="0" width="900" height="34" rx="10" fill="#161b22" />
+  <rect x="0" y="24" width="900" height="10" fill="#0d1117" />
+  <!-- Window buttons -->
+  <circle cx="24" cy="17" r="6" fill="#f38ba8" opacity="0.9" />
+  <circle cx="46" cy="17" r="6" fill="#f9e2af" opacity="0.9" />
+  <circle cx="68" cy="17" r="6" fill="#a6e3a1" opacity="0.9" />
+  <!-- Header -->
+  <text x="20" y="55" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="bold">◉ Parley</text>
+  <text x="80" y="55" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="12">Topic</text>
+  <rect x="120" y="41" width="240" height="22" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1" />
+  <text x="128" y="56" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12">Should we open source our core product?</text>
+  <text x="375" y="55" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="11">Panel</text>
+  <rect x="415" y="41" width="100" height="22" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1" />
+  <text x="422" y="56" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">5: Diverse</text>
+  <text x="530" y="55" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="11">Mode</text>
+  <rect x="570" y="41" width="90" height="22" rx="5" fill="#0d1117" stroke="#30363d" stroke-width="1" />
+  <text x="577" y="56" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">Parallel 1st ⚡</text>
+  <rect x="675" y="41" width="55" height="22" rx="5" fill="#238636" stroke="#2ea043" stroke-width="1" />
+  <text x="689" y="56" fill="#fff" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">Start</text>
+  <rect x="740" y="42" width="70" height="20" rx="12" fill="#1c2128" stroke="#3fb950" stroke-width="1" />
+  <text x="753" y="56" fill="#3fb950" font-family="system-ui, -apple-system, sans-serif" font-size="10" text-anchor="middle">Running</text>
+
+  <!-- Divider below header -->
+  <line x1="0" y1="72" x2="900" y2="72" stroke="#30363d" stroke-width="1" />
+
+  <!-- Main content area split: side panel (left) + circle viz (right) -->
+  
+  <!-- Side panel -->
+  <rect x="0" y="72" width="300" height="508" fill="#161b22" />
+  <line x1="300" y1="72" x2="300" y2="580" stroke="#30363d" stroke-width="1" />
+  
+  <!-- Panel header -->
+  <rect x="0" y="72" width="300" height="32" fill="#161b22" />
+  <line x1="0" y1="104" x2="300" y2="104" stroke="#30363d" stroke-width="1" />
+  <text x="14" y="93" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="bold">Conversation Log</text>
+  <text x="225" y="93" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="11">47 messages</text>
+
+  <!-- Log messages -->
+  <!-- Message 1 - Thinking -->
+  <rect x="8" y="112" width="284" height="44" rx="6" fill="rgba(210,153,34,0.08)" />
+  <rect x="8" y="112" width="3" height="44" rx="3" fill="#d29922" />
+  <text x="18" y="128" fill="#d29922" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">🌙 Luna thinking…</text>
+  <text x="230" y="128" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">2.1s</text>
+  <text x="18" y="146" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11" opacity="0.5">Weighing community benefits vs…</text>
+
+  <!-- Message 2 - Response -->
+  <rect x="8" y="164" width="284" height="52" rx="6" fill="transparent" />
+  <rect x="8" y="164" width="3" height="52" rx="3" fill="#58a6ff" />
+  <text x="18" y="180" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">🌙 Luna</text>
+  <text x="230" y="180" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">12:34:02</text>
+  <text x="18" y="198" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">Open-sourcing builds community trust</text>
+  <text x="18" y="212" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">and drives adoption through…</text>
+
+  <!-- Message 3 - Response -->
+  <rect x="8" y="224" width="284" height="52" rx="6" fill="transparent" />
+  <rect x="8" y="224" width="3" height="52" rx="3" fill="#f97583" />
+  <text x="18" y="240" fill="#f97583" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">🔴 Nova</text>
+  <text x="230" y="240" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">12:34:08</text>
+  <text x="18" y="258" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">Counterpoint: open-sourcing too early</text>
+  <text x="18" y="272" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">can dilute competitive advantage…</text>
+
+  <!-- Message 4 - Thinking -->
+  <rect x="8" y="284" width="284" height="44" rx="6" fill="rgba(210,153,34,0.08)" />
+  <rect x="8" y="284" width="3" height="44" rx="3" fill="#d29922" />
+  <text x="18" y="300" fill="#d29922" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">💡 Spark thinking…</text>
+  <text x="230" y="300" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">1.8s</text>
+  <text x="18" y="318" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11" opacity="0.5">Analyzing hybrid models from…</text>
+
+  <!-- Message 5 - Response -->
+  <rect x="8" y="336" width="284" height="52" rx="6" fill="transparent" />
+  <rect x="8" y="336" width="3" height="52" rx="3" fill="#79c0ff" />
+  <text x="18" y="352" fill="#79c0ff" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">💡 Spark</text>
+  <text x="230" y="352" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">12:34:11</text>
+  <text x="18" y="370" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">What about a middle ground —</text>
+  <text x="18" y="384" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">source-available with delayed…</text>
+
+  <!-- Message 6 - Response -->
+  <rect x="8" y="396" width="284" height="36" rx="6" fill="transparent" />
+  <rect x="8" y="396" width="3" height="36" rx="3" fill="#56d364" />
+  <text x="18" y="412" fill="#56d364" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">🌿 Sage</text>
+  <text x="230" y="412" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">12:34:15</text>
+  <text x="18" y="428" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">+1 to Spark's hybrid approach.</text>
+  <text x="18" y="442" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">We can iterate on that.</text>
+
+  <!-- Circle visualization area -->
+  <rect x="300" y="72" width="600" height="508" fill="#0d1117" />
+  
+  <!-- Center circle glow -->
+  <circle cx="600" cy="320" r="120" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="4,6" opacity="0.3" />
+  <circle cx="600" cy="320" r="90" fill="none" stroke="#30363d" stroke-width="1" stroke-dasharray="2,4" opacity="0.2" />
+  
+  <!-- Agent circles arranged around the center -->
+  <!-- Agent 1: Luna (top) -->
+  <circle cx="600" cy="210" r="22" fill="rgba(88,166,255,0.2)" stroke="#58a6ff" stroke-width="3" />
+  <text x="600" y="216" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">🌙</text>
+  <text x="600" y="242" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Luna</text>
+  <text x="600" y="256" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9" text-anchor="middle">claude-3.5</text>
+
+  <!-- Agent 2: Nova (right) -->
+  <circle cx="730" cy="280" r="22" fill="rgba(249,117,131,0.2)" stroke="#f97583" stroke-width="2" />
+  <text x="730" y="286" fill="#f97583" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">🔴</text>
+  <text x="730" y="312" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">Nova</text>
+  <text x="730" y="326" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9" text-anchor="middle">gemini-flash</text>
+
+  <!-- Agent 3: Spark (bottom-right) -->
+  <circle cx="690" cy="410" r="22" fill="rgba(121,192,255,0.2)" stroke="#79c0ff" stroke-width="2" />
+  <text x="690" y="416" fill="#79c0ff" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">💡</text>
+  <text x="690" y="442" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">Spark</text>
+  <text x="690" y="456" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9" text-anchor="middle">mistral-large</text>
+
+  <!-- Agent 4: Sage (bottom-left) -->
+  <circle cx="510" cy="410" r="22" fill="rgba(86,211,100,0.2)" stroke="#56d364" stroke-width="2" />
+  <text x="510" y="416" fill="#56d364" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">🌿</text>
+  <text x="510" y="442" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">Sage</text>
+  <text x="510" y="456" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9" text-anchor="middle">deepseek-v3</text>
+
+  <!-- Agent 5: Echo (left) -->
+  <circle cx="470" cy="280" r="22" fill="rgba(242,190,110,0.2)" stroke="#f2be6e" stroke-width="2" />
+  <text x="470" y="286" fill="#f2be6e" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">🔊</text>
+  <text x="470" y="312" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">Echo</text>
+  <text x="470" y="326" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9" text-anchor="middle">gpt-4o</text>
+
+  <!-- Connection lines between agents -->
+  <line x1="600" y1="232" x2="730" y2="258" stroke="#30363d" stroke-width="1" opacity="0.4" />
+  <line x1="730" y1="302" x2="690" y2="388" stroke="#30363d" stroke-width="1" opacity="0.4" />
+  <line x1="690" y1="388" x2="510" y2="388" stroke="#30363d" stroke-width="1" opacity="0.4" />
+  <line x1="510" y1="388" x2="470" y2="302" stroke="#30363d" stroke-width="1" opacity="0.4" />
+  <line x1="470" y1="258" x2="600" y2="232" stroke="#30363d" stroke-width="1" opacity="0.4" />
+
+  <!-- Center: speech bubble (Luna currently speaking) -->
+  <rect x="460" y="282" width="280" height="56" rx="12" fill="rgba(22,27,34,0.92)" stroke="#58a6ff" stroke-width="1" />
+  <text x="600" y="302" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold" text-anchor="middle">🌙 Luna says:</text>
+  <text x="600" y="322" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">Open-source builds community trust</text>
+  <text x="600" y="336" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" text-anchor="middle">and drives long-term adoption.</text>
+
+  <!-- Thinking indicator near Luna -->
+  <text x="600" y="196" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="11" text-anchor="middle">2.1s…</text>
+</svg>
